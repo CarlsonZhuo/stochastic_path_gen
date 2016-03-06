@@ -1,26 +1,36 @@
-function mean_payoff = barrier_opt_pricing_formula(sigma, K, B)
-    % STs is is a row vector with every entry being a ST in one simulation.
+function price = barrier_opt_pricing_formula(sigma, K, H)
+    % STs final stock price
     % K is the strike price
-    % r is the risk free interest rate per unit of T.
-    % T is the number of trading days.
-    % b the barrier
+    % H the barrier
+    % q dividend rate
+ 
     global rf_r;
     global T; 
     global initial_capital;
     S0 = initial_capital;
+    q = 0;
+   
+    m1 = (log(S0 / K) + (rf_r - q + sigma^2 / 2) * T) / (sigma * sqrt(T));
+    m2 = (log(S0 / K) + (rf_r - q - sigma^2 / 2) * T) / (sigma * sqrt(T));
     
-    d1 = (log(S0 / K) + (rf_r + sigma^2 / 2) * T) / (sigma * sqrt(T));
-    d2 = (log(S0 / K) + (rf_r - sigma^2 / 2) * T) / (sigma * sqrt(T));
-    d3 = (log(S0 / B) + (rf_r - sigma^2 / 2) * T) / (sigma * sqrt(T));
-    d4 = (log(S0 / B) + (rf_r - sigma^2 / 2) * T) / (sigma * sqrt(T));
-    d5 = (log(S0 / B) - (rf_r - sigma^2 / 2) * T) / (sigma * sqrt(T));
-    d6 = (log(S0 / B) - (rf_r + sigma^2 / 2) * T) / (sigma * sqrt(T));
-    d7 = (log(S0 * K / B^2) - (rf_r - sigma^2 / 2) * T) / (sigma * sqrt(T));
-    d8 = (log(S0 * K / B^2) - (rf_r + sigma^2 / 2) * T) / (sigma * sqrt(T));
-    a = (B / S0)^(- 1 + 2 * rf_r/ sigma^2);
-    b = (B / S0)^(1 + 2 * rf_r/ sigma^2);
-    mean_payoff = K * exp(- rf_r * T) * (normcdf(d4) - normcdf(d2) - a * (normcdf(d7) - normcdf(d5)))...
-                  - S0 * (normcdf(d3) - normcdf(d1) - b * (normcdf(d8) - normcdf(d6)));   
-
+    lambad = (rf_r - q + sigma^2) / sigma^2;
+    m3 = log(H^2 /(S0 * K))/(sigma * sqrt(T)) + lambad * sigma * sqrt(T);
+    
+    c = S0 * exp(-q * T) * normcdf(m1) - K * exp(-rf_r * T) * normcdf(m2);
+    
+    m4 = (log(S0/H))/(sigma * sqrt(T)) + lambad * sigma * sqrt(T);
+    m5 = (log(H/S0))/(sigma * sqrt(T)) + lambad * sigma * sqrt(T);
+    
+  
+        if H <= K
+            cd = S0 * exp(-q * T) * (H / S0)^(2 * lambad) * normcdf(m3) - K * exp(-rf_r * T)*(H / S0)^(2 * lambad - 2) * normcdf(m3 - sigma * sqrt(T));
+            STs = c - cd;
+        end
+        if H > K
+            STs = S0 * normcdf(m4) * exp(-q * T) - K * exp(-rf_r * T) * normcdf(m4 - sigma * sqrt(T))...
+                - S0 * exp(-q * T) * (H / S0)^(2 * lambad) * normcdf(m5) + K * exp(-rf_r * T)*(H / S0)^(2 * lambad - 2) * normcdf(m5 - sigma * sqrt(T)); 
+        end
+            price = STs;
 end
+
 
