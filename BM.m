@@ -1,4 +1,4 @@
-function St = BM(mu, sigma, N) 
+function St = BM(mu, sigma, granuilty) 
 % This function generate the data for one brownian motion.
 % The reason not to generate multiple BM together is that, we don't want
 % our program to hit the memory threshold, and also for an easy migration
@@ -10,11 +10,11 @@ function St = BM(mu, sigma, N)
     global T;
     global initial_capital;
     S1 = initial_capital;
-    dt = 1 / N;
+    dt = T / granuilty;
 
-    St = zeros(N*T, 1);
+    St = zeros(floor(granuilty), 1);
     St(1) = S1;
-    for i=2:N*T
+    for i=2:granuilty
         z = randn; 
         S = St(i-1) + St(i-1) * (mu*dt + sigma*z*sqrt(dt));
         St(i) = S;
