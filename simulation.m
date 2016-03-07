@@ -1,4 +1,4 @@
-function [price_black_scholes, price_euro_opt, price_euro_opt_exact, price_barrier_opt, price_lookback_opt] = simulation(nbSamplePath, nbStepInAPath)
+function [price_black_scholes, price_euro_opt, price_euro_opt_exact, price_barrier_opt,price_barrier_opt_formula, price_lookback_opt] = simulation(nbSamplePath, nbStepInAPath)
     % Define some global vars
     global T;
     T = 100;
@@ -25,8 +25,9 @@ function [price_black_scholes, price_euro_opt, price_euro_opt_exact, price_barri
     price_euro_opt_exact = euro_opt_pricing(STs2, strike_price);
 
     % Pricing the Barrier Option
-    barrier = 1000;
+    barrier = 950;
     price_barrier_opt = barrier_opt_pricing(STs1, min_St, strike_price, barrier);
-
+    price_barrier_opt_formula = barrier_opt_pricing_formula(sigma, strike_price, barrier);
+    
     % Pricing the LookBack Option
     price_lookback_opt = lookback_opt_pricing(STs1, min_St);
